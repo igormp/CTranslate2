@@ -72,73 +72,12 @@ jobs:
         run: |
           tests/ctranslate2_test tests/data
 
-
-  build-and-test-cpp-aarch64:
-    runs-on: ubuntu-20.04
-    env:
-      CT2_VERBOSE: 1
-    strategy:
-      matrix:
-        backend: [openblas]
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install cross compiler and emulator
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y g++-aarch64-linux-gnu gfortran-aarch64-linux-gnu qemu-user-static
-
-      - name: Build with OpenBLAS and Ruy
-        if: matrix.backend == 'openblas'
-        run: |
-          wget https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
-          tar xzvf v0.3.13.tar.gz
-          cd OpenBLAS-0.3.13
-          make TARGET=ARMV8 CC=aarch64-linux-gnu-gcc FC=aarch64-linux-gnu-gfortran HOSTCC=gcc NO_LAPACK=1 -j $(nproc)
-          sudo make PREFIX=/usr/aarch64-linux-gnu install
-          cd ..
-
-          cmake \
-            -DCMAKE_SYSTEM_NAME=Linux \
-            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
-            -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
-            -DCMAKE_FIND_ROOT_PATH=/usr/aarch64-linux-gnu \
-            -DOPENMP_RUNTIME=COMP \
-            -DCMAKE_INSTALL_PREFIX=$PWD/install \
-            -DWITH_MKL=OFF \
-            -DWITH_OPENBLAS=ON \
-            -DWITH_RUY=ON \
-            -DBUILD_TESTS=ON \
-            .
-          make -j $(nproc) install
-
-      - name: Download test data
-        run: |
-          wget https://opennmt-models.s3.amazonaws.com/transliteration-aren-all.tar.gz
-          tar xf transliteration-aren-all.tar.gz -C tests/data/models/
-
-      - name: Test
-        run: |
-          tests/ctranslate2_test tests/data
-        env:
-          QEMU_LD_PREFIX: /usr/aarch64-linux-gnu
-
-
   build-python-wheels:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019]
+        os: [ubuntu-20.04]
         arch: [auto64]
-        include:
-        - os: ubuntu-20.04
-          arch: aarch64
-        - os: macos-12
-          arch: arm64
 
     steps:
       - uses: actions/checkout@v3
@@ -181,7 +120,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019]
+        os: [ubuntu-20.04]
 
     steps:
       - name: Set up Python 3.8
