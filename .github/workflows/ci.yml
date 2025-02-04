@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - fix_execstack_glibc
     tags:
       - v*
   pull_request:
