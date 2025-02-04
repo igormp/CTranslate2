@@ -51,6 +51,8 @@ if sys.platform == "darwin":
 elif sys.platform == "win32":
     cflags = ["/std:c++17", "/d2FH4-"]
     package_data["ctranslate2"] = ["*.dll"]
+else:  # Linux
+    ldflags.append("-Wl,-z,noexecstack")
 
 ctranslate2_module = Extension(
     "ctranslate2._ext",
